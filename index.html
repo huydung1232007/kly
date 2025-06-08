@@ -145,7 +145,7 @@ class Hero{
   }
 }
 class Monster{
-  constructor(){this.size=60;this.x=canvas.width/2;this.y=80;this.vx=450;this.hpMax=150;this.hp=this.hpMax;}
+  constructor(){this.size=60;this.x=canvas.width/2;this.y=80;this.vx=400;this.hpMax=100;this.hp=this.hpMax;}
   update(dt){
     this.x+=this.vx*dt;
     if(this.x-this.size/2<0){this.x=this.size/2;this.vx*=-1;this.y+=20;}
