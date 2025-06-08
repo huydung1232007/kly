@@ -36,9 +36,9 @@ button.main{padding:10px 24px;font-size:16px;cursor:pointer;border:none;border-r
   <div class="panel">
     <h2>Chọn nhân vật</h2>
     <div id="charGrid">
-      <img src="bb.png"    class="charThumb selected" data-src="bb.png"   title="Nhân vật 1">
-      <img src="hero2.png" class="charThumb" data-src="hero2.png" title="Nhân vật 2">
-      <img src="hero3.png" class="charThumb" data-src="hero3.png" title="Nhân vật 3">
+      <img src="ly.png"    class="charThumb selected" data-src="ly.png"   title="Nhân vật 1">
+      <img src="ly2.png" class="charThumb" data-src="ly2.png" title="Nhân vật 2">
+      <img src="ly3.png" class="charThumb" data-src="ly3.png" title="Nhân vật 3">
     </div>
     <button id="btnStart" class="main">Bắt đầu</button>
   </div>
@@ -87,7 +87,7 @@ document.getElementById('btnNameNext').onclick=()=>{
 };
 
 // character thumb selection
-let selectedSrc='bb.png';
+let selectedSrc='ly.png';
 document.querySelectorAll('.charThumb').forEach(img=>{
   img.addEventListener('click',()=>{
     document.querySelectorAll('.charThumb').forEach(i=>i.classList.remove('selected'));
