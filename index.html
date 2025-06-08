@@ -14,17 +14,17 @@ canvas{display:block;background:url('bg.png') center/cover no-repeat;}
 .panel{background:#ff69b4;padding:24px 32px;border-radius:12px;text-align:center;}
 #playerName{width:100%;padding:8px;margin:14px 0;border:none;border-radius:6px;font-size:16px;}
 button.main{padding:10px 24px;font-size:16px;cursor:pointer;border:none;border-radius:6px;background:#26c6da;color:#fff;}
-/* character thumbnails */
 #charGrid{display:flex;gap:16px;justify-content:center;margin:16px 0;}
 .charThumb{width:80px;height:80px;border:3px solid transparent;border-radius:10px;cursor:pointer;object-fit:cover;}
 .charThumb.selected{border-color:#fff;}
-/* inventory */
+/* inventory styles PC */
 #inventory {
   position: fixed; top: 80px; right: 24px; z-index: 11;
   background:rgba(40,40,60,0.85);
   padding:18px 22px; border-radius:18px; box-shadow:0 4px 24px #2228;
   min-width: 130px; font-size: 17px; text-align:center;
   user-select: none;
+  transition: all .25s;
 }
 #btnPowerPotion {
   padding: 7px 14px; border-radius:9px; border:none; background:#47f; color:#fff; cursor:pointer;
@@ -34,11 +34,44 @@ button.main{padding:10px 24px;font-size:16px;cursor:pointer;border:none;border-r
   background: #aaa;
   cursor: not-allowed;
 }
+/* -- Mobile inventory -- */
+#invIcon {
+  display: none;
+  position: fixed; top: 14px; right: 16px; z-index: 99;
+  width: 56px; height: 56px;
+  background: rgba(30,44,255,0.72);
+  border-radius: 14px;
+  box-shadow: 0 4px 16px #1126;
+  justify-content: center; align-items: center;
+  cursor: pointer; transition: background .15s;
+}
+#invIcon span {
+  font-size: 32px; color: #fff; text-shadow: 0 1px 3px #234;
+  display: block;
+}
+#invPopup {
+  display: none;
+  position: fixed; top: 74px; right: 18px; z-index: 999;
+  background:rgba(40,40,60,0.98);
+  border-radius:18px; box-shadow:0 6px 32px #223a;
+  min-width: 170px; font-size: 18px; text-align:center; padding:18px 12px;
+  user-select: none;
+  animation: popFade .25s;
+}
+@keyframes popFade {
+  0% {transform: translateY(-24px); opacity:0;}
+  100% {transform: none; opacity:1;}
+}
+/* responsive: mobile */
+@media (max-width: 600px) {
+  #inventory { display: none !important; }
+  #invIcon { display: flex !important; }
+}
 </style>
 </head>
 <body>
 
-<!-- Inventory UI -->
+<!-- Inventory UI - PC -->
 <div id="inventory">
   <b>Hành trang</b>
   <div style="margin:12px 0;">
@@ -46,6 +79,19 @@ button.main{padding:10px 24px;font-size:16px;cursor:pointer;border:none;border-r
       Thuốc tăng sức mạnh <span id="potionCount">(1)</span>
     </button>
   </div>
+</div>
+<!-- Inventory Icon - Mobile -->
+<div id="invIcon" title="Hành trang"><span>🎒</span></div>
+<!-- Popup inventory Mobile -->
+<div id="invPopup">
+  <b>Hành trang</b>
+  <div style="margin:13px 0 7px 0;">
+    <button id="btnPowerPotionMobile">
+      Thuốc tăng sức mạnh <span id="potionCountMobile">(1)</span>
+    </button>
+  </div>
+  <button onclick="document.getElementById('invPopup').style.display='none'" style="
+    background:none;border:none;padding:4px 0 0 0; color:#eee; font-size:16px;cursor:pointer;">Đóng</button>
 </div>
 
 <!-- Name screen -->
@@ -109,31 +155,65 @@ let powerBoosted = false;
 let powerBoostTime = 0;
 const powerBoostDuration = 6000; // 6 giây
 
+// --- PC inventory ---
 function updatePotionUI() {
   document.getElementById('potionCount').textContent = `(${potionCount})`;
   document.getElementById('btnPowerPotion').disabled = potionCount === 0 || powerBoosted || !gameRunning;
 }
+// --- Mobile inventory ---
+function updatePotionUIMobile() {
+  document.getElementById('potionCountMobile').textContent = `(${potionCount})`;
+  document.getElementById('btnPowerPotionMobile').disabled = potionCount === 0 || powerBoosted || !gameRunning;
+}
 
+// Sự kiện PC
 document.getElementById('btnPowerPotion').onclick = () => {
+  usePotion();
+};
+// Sự kiện mobile
+document.getElementById('btnPowerPotionMobile').onclick = () => {
+  usePotion();
+  document.getElementById('invPopup').style.display='none';
+};
+// Icon click mobile
+document.getElementById('invIcon').onclick = () => {
+  document.getElementById('invPopup').style.display='block';
+};
+
+// Ẩn popup khi click ngoài
+document.addEventListener('click', function(e){
+  const popup = document.getElementById('invPopup');
+  const icon = document.getElementById('invIcon');
+  if(window.innerWidth>600) return; // chỉ trên mobile
+  if(popup.style.display==='block'
+    && !popup.contains(e.target)
+    && !icon.contains(e.target)) {
+      popup.style.display = 'none';
+    }
+});
+
+// Dùng chung cho cả 2 UI
+function usePotion() {
   if (potionCount > 0 && !powerBoosted && gameRunning) {
     potionCount--;
     updatePotionUI();
+    updatePotionUIMobile();
     powerBoosted = true;
     powerBoostTime = performance.now();
     hero.speed *= 1.7;
-    // Sau powerBoostDuration ms, hết buff
     setTimeout(() => {
       powerBoosted = false;
       hero.speed /= 1.7;
       updatePotionUI();
+      updatePotionUIMobile();
     }, powerBoostDuration);
   }
-};
-
+}
 function resetInventory() {
   potionCount = 1;
   powerBoosted = false;
   updatePotionUI();
+  updatePotionUIMobile();
 }
 
 // state
@@ -272,7 +352,8 @@ function initGame(){
   gameStartTime=lastTime;gameRunning=true;
   resetInventory();
   updatePotionUI();
-  requestAnimationFrame(loop);
+  updatePotionUIMobile();
+  document.getElementById('invPopup').style.display='none';
 }
 function endGame(win){
   gameRunning=false;
@@ -281,6 +362,8 @@ function endGame(win){
   resultTime.textContent='Thời gian: '+total+' giây';
   resultScreen.style.display='flex';
   updatePotionUI();
+  updatePotionUIMobile();
+  document.getElementById('invPopup').style.display='none';
 }
 function loop(now){
   if(!gameRunning)return;
