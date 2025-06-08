@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<title>Hit BOSS LY - Hành Trang</title>
+<title> Hit BOSS LY</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
 html,body{margin:0;padding:0;background:#000;height:100%;overflow:hidden;font-family:sans-serif;color:#fff}
@@ -14,90 +14,18 @@ canvas{display:block;background:url('bg.png') center/cover no-repeat;}
 .panel{background:#ff69b4;padding:24px 32px;border-radius:12px;text-align:center;}
 #playerName{width:100%;padding:8px;margin:14px 0;border:none;border-radius:6px;font-size:16px;}
 button.main{padding:10px 24px;font-size:16px;cursor:pointer;border:none;border-radius:6px;background:#26c6da;color:#fff;}
+/* character thumbnails */
 #charGrid{display:flex;gap:16px;justify-content:center;margin:16px 0;}
 .charThumb{width:80px;height:80px;border:3px solid transparent;border-radius:10px;cursor:pointer;object-fit:cover;}
 .charThumb.selected{border-color:#fff;}
-/* inventory styles PC */
-#inventory {
-  position: fixed; top: 80px; right: 24px; z-index: 11;
-  background:rgba(40,40,60,0.85);
-  padding:18px 22px; border-radius:18px; box-shadow:0 4px 24px #2228;
-  min-width: 130px; font-size: 17px; text-align:center;
-  user-select: none;
-  transition: all .25s;
-}
-#btnPowerPotion {
-  padding: 7px 14px; border-radius:9px; border:none; background:#47f; color:#fff; cursor:pointer;
-  font-size: 15px;
-}
-#btnPowerPotion[disabled] {
-  background: #aaa;
-  cursor: not-allowed;
-}
-/* -- Mobile inventory -- */
-#invIcon {
-  display: none;
-  position: fixed; top: 14px; right: 16px; z-index: 99;
-  width: 56px; height: 56px;
-  background: rgba(30,44,255,0.72);
-  border-radius: 14px;
-  box-shadow: 0 4px 16px #1126;
-  justify-content: center; align-items: center;
-  cursor: pointer; transition: background .15s;
-}
-#invIcon span {
-  font-size: 32px; color: #fff; text-shadow: 0 1px 3px #234;
-  display: block;
-}
-#invPopup {
-  display: none;
-  position: fixed; top: 74px; right: 18px; z-index: 999;
-  background:rgba(40,40,60,0.98);
-  border-radius:18px; box-shadow:0 6px 32px #223a;
-  min-width: 170px; font-size: 18px; text-align:center; padding:18px 12px;
-  user-select: none;
-  animation: popFade .25s;
-}
-@keyframes popFade {
-  0% {transform: translateY(-24px); opacity:0;}
-  100% {transform: none; opacity:1;}
-}
-/* responsive: mobile */
-@media (max-width: 600px) {
-  #inventory { display: none !important; }
-  #invIcon { display: flex !important; }
-}
 </style>
 </head>
 <body>
 
-<!-- Inventory UI - PC -->
-<div id="inventory">
-  <b>Hành trang</b>
-  <div style="margin:12px 0;">
-    <button id="btnPowerPotion">
-      Thuốc tăng sức mạnh <span id="potionCount">(1)</span>
-    </button>
-  </div>
-</div>
-<!-- Inventory Icon - Mobile -->
-<div id="invIcon" title="Hành trang"><span>🎒</span></div>
-<!-- Popup inventory Mobile -->
-<div id="invPopup">
-  <b>Hành trang</b>
-  <div style="margin:13px 0 7px 0;">
-    <button id="btnPowerPotionMobile">
-      Thuốc tăng sức mạnh <span id="potionCountMobile">(1)</span>
-    </button>
-  </div>
-  <button onclick="document.getElementById('invPopup').style.display='none'" style="
-    background:none;border:none;padding:4px 0 0 0; color:#eee; font-size:16px;cursor:pointer;">Đóng</button>
-</div>
-
 <!-- Name screen -->
 <div id="nameScreen" class="overlay">
   <div class="panel">
-    <h2>Cho xin cái tên đi</h2>
+    <h2>Cho xin cái tên đi  </h2>
     <input id="playerName" type="text" placeholder="Tên của bạn…">
     <button id="btnNameNext" class="main">Tiếp tục</button>
   </div>
@@ -149,73 +77,6 @@ const resultScreen=document.getElementById('resultScreen');
 const resultTitle=document.getElementById('resultTitle');
 const resultTime=document.getElementById('resultTime');
 
-// Inventory/potion vars
-let potionCount = 1;
-let powerBoosted = false;
-let powerBoostTime = 0;
-const powerBoostDuration = 6000; // 6 giây
-
-// --- PC inventory ---
-function updatePotionUI() {
-  document.getElementById('potionCount').textContent = `(${potionCount})`;
-  document.getElementById('btnPowerPotion').disabled = potionCount === 0 || powerBoosted || !gameRunning;
-}
-// --- Mobile inventory ---
-function updatePotionUIMobile() {
-  document.getElementById('potionCountMobile').textContent = `(${potionCount})`;
-  document.getElementById('btnPowerPotionMobile').disabled = potionCount === 0 || powerBoosted || !gameRunning;
-}
-
-// Sự kiện PC
-document.getElementById('btnPowerPotion').onclick = () => {
-  usePotion();
-};
-// Sự kiện mobile
-document.getElementById('btnPowerPotionMobile').onclick = () => {
-  usePotion();
-  document.getElementById('invPopup').style.display='none';
-};
-// Icon click mobile
-document.getElementById('invIcon').onclick = () => {
-  document.getElementById('invPopup').style.display='block';
-};
-
-// Ẩn popup khi click ngoài
-document.addEventListener('click', function(e){
-  const popup = document.getElementById('invPopup');
-  const icon = document.getElementById('invIcon');
-  if(window.innerWidth>600) return; // chỉ trên mobile
-  if(popup.style.display==='block'
-    && !popup.contains(e.target)
-    && !icon.contains(e.target)) {
-      popup.style.display = 'none';
-    }
-});
-
-// Dùng chung cho cả 2 UI
-function usePotion() {
-  if (potionCount > 0 && !powerBoosted && gameRunning) {
-    potionCount--;
-    updatePotionUI();
-    updatePotionUIMobile();
-    powerBoosted = true;
-    powerBoostTime = performance.now();
-    hero.speed *= 1.7;
-    setTimeout(() => {
-      powerBoosted = false;
-      hero.speed /= 1.7;
-      updatePotionUI();
-      updatePotionUIMobile();
-    }, powerBoostDuration);
-  }
-}
-function resetInventory() {
-  potionCount = 1;
-  powerBoosted = false;
-  updatePotionUI();
-  updatePotionUIMobile();
-}
-
 // state
 let playerName='Ngô Thùy Ngân';
 document.getElementById('btnNameNext').onclick=()=>{
@@ -237,6 +98,7 @@ document.querySelectorAll('.charThumb').forEach(img=>{
 
 // start button
 document.getElementById('btnStart').onclick=()=>{
+  // set hero image
   heroImg.src=selectedSrc;
   selectScreen.style.display='none';
   initGame();
@@ -246,21 +108,12 @@ document.getElementById('btnStart').onclick=()=>{
 document.getElementById('btnRestart').onclick=()=>{
   resultScreen.style.display='none';
   nameScreen.style.display='flex';
-  resetInventory();
 };
 
 // controls
 const keys={left:false,right:false,shoot:false};
-document.addEventListener('keydown',e=>{
-  if(e.code==='ArrowLeft')keys.left=true;
-  if(e.code==='ArrowRight')keys.right=true;
-  if(e.code==='Space')keys.shoot=true;
-});
-document.addEventListener('keyup',e=>{
-  if(e.code==='ArrowLeft')keys.left=false;
-  if(e.code==='ArrowRight')keys.right=false;
-  if(e.code==='Space')keys.shoot=false;
-});
+document.addEventListener('keydown',e=>{if(e.code==='ArrowLeft')keys.left=true;if(e.code==='ArrowRight')keys.right=true;if(e.code==='Space')keys.shoot=true;});
+document.addEventListener('keyup',e=>{if(e.code==='ArrowLeft')keys.left=false;if(e.code==='ArrowRight')keys.right=false;if(e.code==='Space')keys.shoot=false;});
 ['btnLeft','btnRight','btnShoot'].forEach(id=>{
   const flag={btnLeft:'left',btnRight:'right',btnShoot:'shoot'}[id];
   const el=document.getElementById(id);
@@ -271,7 +124,6 @@ document.addEventListener('keyup',e=>{
 // game vars
 let hero,monster,bullets=[],particles=[],lastShoot=0,lastTime=0,gameStartTime=0,gameRunning=false;
 const BULLET_RATE=1/3;
-
 class Hero{
   constructor(){this.w=60;this.h=60;this.x=canvas.width/2;this.y=canvas.height-this.h-80;this.speed=300;this.hp=100;}
   update(dt){
@@ -283,22 +135,8 @@ class Hero{
     }
   }
   draw(){
-    // HIỆU ỨNG HÀO QUANG
-    if(powerBoosted){
-      ctx.save();
-      ctx.globalAlpha = 0.35;
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.w * 0.8 + Math.sin(performance.now()/150)*7, 0, Math.PI*2);
-      ctx.fillStyle = "#ffd600";
-      ctx.shadowColor = "#ffea00";
-      ctx.shadowBlur = 18;
-      ctx.fill();
-      ctx.restore();
-    }
-    // vẽ nhân vật như bình thường
     if(heroImg.complete&&heroImg.naturalWidth)ctx.drawImage(heroImg,this.x-this.w/2,this.y-this.h/2,this.w,this.h);
     else{ctx.fillStyle='#f06';ctx.fillRect(this.x-this.w/2,this.y-this.h/2,this.w,this.h);}
-    // thanh máu và tên
     const barW=this.w,barY=this.y-this.h/2-16;
     ctx.fillStyle='#555';ctx.fillRect(this.x-barW/2,barY,barW,6);
     ctx.fillStyle='#0f0';ctx.fillRect(this.x-barW/2,barY,barW*(this.hp/100),6);
@@ -306,7 +144,6 @@ class Hero{
     ctx.fillText(playerName,this.x,barY-4);
   }
 }
-
 class Monster{
   constructor(){this.size=60;this.x=canvas.width/2;this.y=80;this.vx=400;this.hpMax=60;this.hp=this.hpMax;}
   update(dt){
@@ -321,13 +158,10 @@ class Monster{
     ctx.fillStyle='#f00';ctx.fillRect(this.x-this.size/2,this.y-this.size/2-10,this.size*(this.hp/this.hpMax),6);
   }
 }
-
-class Bullet{
-  constructor(x,y){this.x=x;this.y=y;this.speed=500;this.size=24;}
+class Bullet{constructor(x,y){this.x=x;this.y=y;this.speed=500;this.size=24;}
   update(dt){this.y-=this.speed*dt;}
   draw(){ctx.font=this.size+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#ff5b9f';ctx.fillText('❤',this.x,this.y);}
 }
-
 class Particle{
   constructor(x,y){
     this.x=x+(Math.random()-0.5)*20;
@@ -345,15 +179,11 @@ class Particle{
     ctx.globalAlpha=1;
   }
 }
-
 function spawnExplosion(x,y){for(let i=0;i<15;i++)particles.push(new Particle(x,y));}
 function initGame(){
   hero=new Hero();monster=new Monster();bullets=[];particles=[];lastShoot=0;lastTime=performance.now();
   gameStartTime=lastTime;gameRunning=true;
-  resetInventory();
-  updatePotionUI();
-  updatePotionUIMobile();
-  document.getElementById('invPopup').style.display='none';
+  requestAnimationFrame(loop);
 }
 function endGame(win){
   gameRunning=false;
@@ -361,9 +191,6 @@ function endGame(win){
   const total=((performance.now()-gameStartTime)/1000).toFixed(1);
   resultTime.textContent='Thời gian: '+total+' giây';
   resultScreen.style.display='flex';
-  updatePotionUI();
-  updatePotionUIMobile();
-  document.getElementById('invPopup').style.display='none';
 }
 function loop(now){
   if(!gameRunning)return;
