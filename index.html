@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
 html,body{margin:0;padding:0;background:#000;height:100%;overflow:hidden;font-family:sans-serif;color:#fff}
-canvas{display:block;background:url('bg.png') center/cover no-repeat;}
+canvas{display:block;background:url('background.png') center/cover no-repeat;}
 #pad{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:flex;gap:14px;z-index:5;}
 .btn{width:72px;height:72px;background:rgba(51,51,51,.35);border-radius:12px;display:flex;justify-content:center;align-items:center;font-size:32px;color:#fff;user-select:none;}
 @media(min-width:900px){#pad{display:none}}
@@ -68,7 +68,7 @@ function resize(){canvas.width=innerWidth;canvas.height=innerHeight;}window.addE
 
 // asset containers
 let heroImg=new Image(); // will set src after selection
-const monsterImg=new Image();monsterImg.src='hh.png';
+const monsterImg=new Image();monsterImg.src='vu.png';
 
 // UI refs
 const nameScreen=document.getElementById('nameScreen');
